@@ -35,27 +35,24 @@ async function fetchWithRetry(url, opts, retries = MAX_RETRIES) {
 }
 
 module.exports = async (req, res) => {
-  // CORS preflight
   if (req.method === 'OPTIONS') {
     const pre = buildResponse(200, '');
     res.status(pre.statusCode).set(pre.headers).send(pre.body);
     return;
   }
-
   if (req.method !== 'POST') {
     const bad = buildResponse(405, { error: 'Method Not Allowed' });
     res.status(bad.statusCode).set(bad.headers).send(bad.body);
     return;
   }
-
   let payload = req.body;
   try {
     const { status, text } = await fetchWithRetry(
       'https://api.inventoryiq.co/sales-agent/message',
       {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json', 'Accept': '*/*' },
-        body:    JSON.stringify(payload)
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
       }
     );
     const ok = buildResponse(status, text);
